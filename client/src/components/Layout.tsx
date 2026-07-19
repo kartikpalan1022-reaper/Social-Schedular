@@ -37,7 +37,7 @@ const Layout = () => {
                     <p className='text-sm text-slate-400  hidden sm:block'>Manage and automate your social presence</p>
                 </div>
             </header>
-            <main className='flex-1 overflow-auto p-4 sm:p-6 md:p-8 x1:p-12'>
+            <main className='flex-1 overflow-auto p-4 sm:p-6 md:p-8 xl:p-12'>
                 <Outlet />
             </main>
         </div>
