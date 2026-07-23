@@ -31,7 +31,7 @@ const AccountList = ({accounts,onDisconnect}: AccountListProps) => {
             const meta = PLATFORMS.find((p)=>p.id === account.platform);
             if(!meta) return null;
             return(
-                <div key={index} className="group bg-white-border border-slate-200 rounded-2xl p-5 flex items-center gap-4 hover:border-slate-300">
+                <div key={index} className="group bg-white border border-slate-200 rounded-2xl p-5 flex items-center gap-4 hover:border-slate-300">
                     <div className="size-12 bg-slate-50 rounded-xl flex items-center justify-center shrink-0">
                         <meta.icon className="size-6 text-slate-500" />
                     </div>
