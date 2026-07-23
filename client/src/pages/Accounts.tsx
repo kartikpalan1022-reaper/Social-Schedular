@@ -31,7 +31,7 @@ const Accounts = () => {
   }
 
   const handleDisconnect = async(accountId : string)=>{
-    setAccounts(accounts.filter((a)=> a.id !== accountId))
+    setAccounts(accounts.filter((a)=> a._id !== accountId))
   }
   const connectedIds = accounts.map((a)=>a.platform)
 
