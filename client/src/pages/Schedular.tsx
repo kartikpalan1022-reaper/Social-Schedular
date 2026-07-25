@@ -64,7 +64,7 @@ const Schedular = () => {
             {/* Content */}
             <div>
               <label className="block text-xs text-slate-500 uppercase mb-2">Content</label>
-              <textarea required rows={5} placeholder="What you want to share today?" className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 text-sm placeholder-slate-400 outline-none resize-none" value={content} onChange={(e)=>setContent(e.target.value)} />
+              <textarea maxLength={280} required rows={5} placeholder="What you want to share today?" className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 text-sm placeholder-slate-400 outline-none resize-none" value={content} onChange={(e)=>setContent(e.target.value)} />
               <div className={`text-right text-xs mt-1 font-medium ${content.length>270 ? "text-red-500" : "text-slate-400"}`}>
                 {content.length}/280
               </div>
@@ -102,7 +102,7 @@ const Schedular = () => {
                 </div>
               </div>
               <div>
-                <label className="block text-xs text-slate-500 uppercase mb-2">Date</label>
+                <label className="block text-xs text-slate-500 uppercase mb-2">Time</label>
                 <div className="relative">
                   <ClockIcon className="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                   <input type="time" required className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-sm outline-none" value={scheduledTime} onChange={(e)=>setScheduledTime(e.target.value)} />
@@ -129,7 +129,7 @@ const Schedular = () => {
       </div>
 
       {/* Queue panels */}
-      <div className="flex-1 flex flex-col gap-6 miin-w-0">
+      <div className="flex-1 flex flex-col gap-6 min-w-0">
 
         {/* Upcoming Post */}
         <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
