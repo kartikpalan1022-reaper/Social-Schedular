@@ -54,7 +54,7 @@ const AIComposer = () => {
                 <span className={`pointer-events-none size-4 transform translate-y-0.5 rounded-full bg-white transition ${generateImage ? "translate-x-4.5" : "translate-x-0.5"}`} />
               </div>
             </button>
-            <button onClick={handleGenerate} disabled={loading} className="bg-slate-900 hover:bg-slate-800 text-white flex items-center gap-2 px-4 py-2 rounded-lg">
+            <button onClick={handleGenerate} disabled={loading ||  !prompt.trim()} className="bg-slate-900 hover:bg-slate-800 text-white flex items-center gap-2 px-4 py-2 rounded-lg">
               {loading ? (
                 <>
                   <Loader2Icon className="size-4 animate-spin" />
@@ -71,7 +71,7 @@ const AIComposer = () => {
         </div>
         <div className="flex flex-wrap justify-center gap-2">
           {tones.map((t)=>(
-            <button key={t} onClick={()=>setTone(t)} className={`px-4 py-1.5 rounded-full text-sm tranistion-all border ${tone === t ? "bg-red-500 border-red-500 text-white" : "bg-white border-slate-200 text-slate-500 hover:border-slate-300"}`}>
+            <button key={t} onClick={()=>setTone(t)} className={`px-4 py-1.5 rounded-full text-sm transition-all border ${tone === t ? "bg-red-500 border-red-500 text-white" : "bg-white border-slate-200 text-slate-500 hover:border-slate-300"}`}>
               {t}
             </button>
           ))}
@@ -132,7 +132,7 @@ const AIComposer = () => {
       {/* Scheduler modal */}
       {activeScheduler && (
         <div className="fixed inset-0 min-h-screen z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md animate-in fade-in duration-300">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl border border-slate-100 overflow:hidden flex flex-col max-h-[90vh]">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl border border-slate-100 overflow-hidden flex flex-col max-h-[90vh]">
             <div className="flex items-center justify-between px-8 py-4 border-b border-slate-100 bg-slate-50/30 ">
               <h3 className="text-slate-900">Schedule Generation</h3>
               <button onClick={()=>setActiveScheduler(null)} className="p-2 rounded-full hover:bg-slate-100 text-slate-400 transition-colors">
