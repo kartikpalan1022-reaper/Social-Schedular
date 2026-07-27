@@ -10,7 +10,7 @@ const generateToken = (id: string)=>{
 // Register User
 //POST /api/auth/register
 
-export const registerUser = async(req:Request,res:Response):Promise<void>{
+export const registerUser = async(req:Request,res:Response):Promise<void>=>{
     try{
         const {name,email,password} = req.body; 
         const userExists = await User.findOne({email});
@@ -36,7 +36,7 @@ export const registerUser = async(req:Request,res:Response):Promise<void>{
 
 // Login User
 //POST /api/auth/login
-export const loginUser = async(req:Request,res:Response):Promise<void>{
+export const loginUser = async(req:Request,res:Response):Promise<void>=>{
     try{
         const {email,password} = req.body; 
         const user = await User.findOne({email});
