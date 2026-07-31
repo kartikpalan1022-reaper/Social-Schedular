@@ -48,6 +48,7 @@ export const generateAuthUrl = async (req:AuthRequest,res:Response):Promise<void
 
         const origin = req.headers.origin;
         const redirectUrl = `${origin}/accounts`;
+        // const redirectUrl = `${process.env.CLIENT_URL}/accounts`;
 
         const result = await zernio.connect.getConnectUrl({
             path:{platform:platform as any},
