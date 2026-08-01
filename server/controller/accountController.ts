@@ -2,6 +2,7 @@ import { Response } from "express";
 import { AuthRequest } from "../middleware/authMiddleware.js";
 import { Account } from "../model/Account.js";
 import zernio from "../config/zernio.js";
+import mongoose from "mongoose";
 
 // Get all accounts
 // GET /api/accounts
@@ -31,6 +32,13 @@ export const addAccount = async (req:AuthRequest,res:Response):Promise<void>=>{
 // Disconnect account
 // DELETE /api/accounts/:id
 export const disconnectAccount = async (req:AuthRequest,res:Response):Promise<void>=>{
+
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+        res.status(400).json({
+            message: "Invalid account ID",
+        });
+        return;
+    }
     try{
        const account = await Account.findOne({_id:req.params.id, user:req.user._id});
        if(!account){
