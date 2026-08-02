@@ -27,11 +27,17 @@ const pollLeonardoJob = async (generationId:string,apiKey:string):Promise<string
                 throw new Error("Generation complete but no images found");
             }
             if(generation.status === "FAILED"){
-                throw new Error("Generation complete but no images found");
+                // throw new Error("Generation complete but no images found");
+                throw new Error("Leonardo.ai generation failed");
             }
         }
-        catch(err:any){
-            console.error("Polling Error:",err?.response?.data || err.message);
+        catch (err: any) {
+            console.error("Polling Error:", err?.response?.data || err.message);
+
+            if (err.message === "Leonardo.ai generation failed" ||
+                err.message === "Generation complete but no images found") {
+                throw err;
+            }
         }
         await new Promise((resolve)=>setTimeout(resolve,delay));
     }
@@ -45,7 +51,7 @@ export const generatePost = async(req:AuthRequest,res:Response):Promise<void>=>{
         const {prompt,tone,generateImage}= req.body;
         const apiKey = process.env.GEMINI_API_KEY;
         if(!apiKey){
-            res.status(400).json({message:"Gemini API KEY is missing. Please add it to your srever/.env file"});
+            res.status(400).json({message:"Gemini API KEY is missing. Please add it to your server/.env file"});
             return;
         }
 
@@ -65,7 +71,7 @@ export const generatePost = async(req:AuthRequest,res:Response):Promise<void>=>{
         let imagePrompt = prompt;
         try{
             const rawText = textResponse.text || "";
-            const jsonMatch = rawText.match(/\{[\s|s]*\}/);
+            const jsonMatch = rawText.match(/\{[\s\S]*\}/);
             const data = jsonMatch ? JSON.parse(jsonMatch[0]) : {content:rawText, imagePrompt: prompt};
             content = data.content;
             imagePrompt = data.imagePrompt;
@@ -128,8 +134,12 @@ export const generatePost = async(req:AuthRequest,res:Response):Promise<void>=>{
         })
         res.json(generation)
     }
-    catch(error:any){
-        res.status(500).json({message:error?.message || "Server Error"})
+    catch (error:any) {
+        console.error("generatePost:", error);
+
+        res.status(500).json({
+            message: "Internal Server Error",
+        });
     }
 }
 
@@ -140,8 +150,12 @@ export const getGenerations = async(req:AuthRequest,res:Response):Promise<void>=
         const generations = await Generation.find({user:req.user._id}).sort({createdAt:-1})
         res.json(generations)
     }
-    catch(error :any){
-        res.status(500).json({message:error?.message || "Server Error"})
+    catch (error:any) {
+        console.error("generatePost:", error);
+
+        res.status(500).json({
+            message: "Internal Server Error",
+        });
     }
 }
 
@@ -153,8 +167,12 @@ export const getPosts = async(req:AuthRequest,res:Response):Promise<void>=>{
         res.json(posts);
        
     }
-    catch(error :any){
-        res.status(500).json({message:error?.message || "Server Error"})
+    catch (error:any) {
+        console.error("generatePost:", error);
+
+        res.status(500).json({
+            message: "Internal Server Error",
+        });
     }
 }
 
@@ -199,7 +217,11 @@ export const schedulePost = async(req:AuthRequest,res:Response):Promise<void>=>{
         })
         res.status(201).json(post)
     }
-    catch(error :any){
-        res.status(500).json({message:error?.message || "Server Error"})
+    catch (error:any) {
+        console.error("generatePost:", error);
+
+        res.status(500).json({
+            message: "Internal Server Error",
+        });
     }
 }
