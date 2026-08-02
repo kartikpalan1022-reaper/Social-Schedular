@@ -32,8 +32,8 @@ export const addAccount = async (req:AuthRequest,res:Response):Promise<void>=>{
 // Disconnect account
 // DELETE /api/accounts/:id
 export const disconnectAccount = async (req:AuthRequest,res:Response):Promise<void>=>{
-
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    const accountId = String(req.params.id);
+    if (!mongoose.Types.ObjectId.isValid(accountId)) {
         res.status(400).json({
             message: "Invalid account ID",
         });
