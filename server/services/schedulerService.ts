@@ -23,7 +23,8 @@ export const initScheduler = ()=>{
                         continue;
                     }
                     const zernioPlatforms = accounts.map((acc)=>({
-                        tform:acc.platform as any,
+                        // tform:acc.platform as any,
+                        plattform:acc.platform as any,
                         accountId:acc.zernioAccountId!
                     }))
                     const payload={
@@ -33,24 +34,48 @@ export const initScheduler = ()=>{
                         platforms:zernioPlatforms,
                     }
                     console.log(`Publishing post ${post._id} to zernio with media: ${post.mediaUrl || "none"}`)
+                    // const response = await zernio.posts.createPost({
+                    //     body:payload
+                    // })
+                    // const publishedPost = (response.data as any)?.post || response.data;
+                    
+                    // if(!publishedPost){
+                    //     throw new Error("Failed to get post object from Zernio response");
+                    // }
+                    // console.log(`Zernio post created: ${publishedPost._id || publishedPost.id}`);
+                    // post.status="published",
+                    // await post.save();
+
+                    // await ActivityLog.create({
+                    //     user:post.user,
+                    //     actionType:"POST_PUBLISHED",
+                    //     description:`Published post to ${accounts.map((a)=>a.platform).join(",")}`,
+                    //     relatedPosts:post._id,
+                    // })
+                   
                     const response = await zernio.posts.createPost({
-                        body:payload
-                    })
+                        body: payload,
+                    });
+
                     const publishedPost = (response.data as any)?.post || response.data;
                     
                     if(!publishedPost){
-                        throw new Error("Failed to get post object from Zernio response");
+                       throw new Error("Failed to get post object from Zernio response");
                     }
                     console.log(`Zernio post created: ${publishedPost._id || publishedPost.id}`);
                     post.status="published",
                     await post.save();
 
-                    await ActivityLog.create({
-                        user:post.user,
-                        actionType:"POST_PUBLISHED",
-                        description:`Published post to ${accounts.map((a)=>a.platform).join(",")}`,
-                        relatedPosts:post._id,
-                    })
+                    try {
+                        await ActivityLog.create({
+                            user: post.user,
+                            actionType: "POST_PUBLISHED",
+                            description: `Published post to ${accounts.map(a => a.platform).join(", ")}`,
+                            relatedPosts: post._id,
+                        });
+                    } catch (logError) {
+                        console.error("Activity log failed:", logError);
+                    }
                 }
                 catch(err:any){
                     console.error(`Failed to publish post ${post._id}:`,err?.response?.data || err?.message);
