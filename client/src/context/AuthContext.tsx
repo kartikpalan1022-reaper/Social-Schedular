@@ -23,15 +23,25 @@ export const AuthProvider:React.FC<{children:React.ReactNode}> = ({children})=>{
     const [isLoading,setIsLoading] = useState(true);
 
     useEffect(()=>{
-        const storedUser = localStorage.getItem("user");
-        const storedToken = localStorage.getItem("token");
+        try{
+            const storedUser = localStorage.getItem("user");
+            const storedToken = localStorage.getItem("token");
 
-        if(storedUser && storedToken){
-            setUser(JSON.parse(storedUser));
-            setToken(storedToken);
-            api.defaults.headers.common["Authorization"] = `Bearer ${storedToken}`
-        }   
-        setIsLoading(false);
+            if(storedUser && storedToken){
+                setUser(JSON.parse(storedUser));
+                setToken(storedToken);
+                api.defaults.headers.common["Authorization"] = `Bearer ${storedToken}`
+            }   
+        }
+        catch(err){
+            console.error("Invalid auth data:", err);
+            localStorage.removeItem("user");
+            localStorage.removeItem("token");
+        } finally {
+            setIsLoading(false);
+        }
+            
+        
     },[]);
 
     const login = (userData:User, newToken:string)=>{
