@@ -89,23 +89,23 @@ Social-Schedular/
 
 ### 🔐 Login
 
-<img width="1866" height="1038" alt="Image" src="https://github.com/user-attachments/assets/a945ab77-e52e-4cc9-9c6b-fde5fa7529b2" />
+<img width="1866" height="1038" alt="Login Screen" src="https://github.com/user-attachments/assets/a945ab77-e52e-4cc9-9c6b-fde5fa7529b2" />
 
 ### 📊 Dashboard
 
-<img width="1867" height="1044" alt="Image" src="https://github.com/user-attachments/assets/932a9623-97f2-4a21-8a75-5987068bd073" />
+<img width="1867" height="1044" alt="Dashboard" src="https://github.com/user-attachments/assets/932a9623-97f2-4a21-8a75-5987068bd073" />
 
 ### 🔗 Connected Social Accounts
 
-<img width="1862" height="1038" alt="Image" src="https://github.com/user-attachments/assets/55f8d1b2-cc07-4b23-8fcf-38fa4350f715" />
+<img width="1862" height="1038" alt="Accounts Screen" src="https://github.com/user-attachments/assets/55f8d1b2-cc07-4b23-8fcf-38fa4350f715" />
 
 ### 🤖 AI Composer
 
-<img width="1875" height="1049" alt="Image" src="https://github.com/user-attachments/assets/4dddeb38-28e4-45d8-9a17-0a641a66c50c" />
+<img width="1875" height="1049" alt="AI Composer Page " src="https://github.com/user-attachments/assets/4dddeb38-28e4-45d8-9a17-0a641a66c50c" />
 
 ### 📅 Post Scheduler
 
-<img width="1870" height="1042" alt="Image" src="https://github.com/user-attachments/assets/32928111-b31a-4647-a374-a80a98bf8dde" />
+<img width="1870" height="1042" alt="Scheduler Page " src="https://github.com/user-attachments/assets/32928111-b31a-4647-a374-a80a98bf8dde" />
 
 
 
