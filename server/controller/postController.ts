@@ -5,6 +5,8 @@ import axios from "axios"
 import { cloudinary } from "../config/cloudinary.js";
 import { Generation } from "../model/Generation.js";
 import { Post } from "../model/Post.js";
+import crypto from "crypto";
+import { Account } from "../model/Account.js";
 
 
 // Generate Post
@@ -173,6 +175,32 @@ export const schedulePost = async(req:AuthRequest,res:Response):Promise<void>=>{
             mediaUrl = result.secure_url;
             mediaType = result .resource_type === "video" ? "video" : "image";
         }
+        const connectedAccounts = await Account.find({
+            user: req.user._id,
+            platform: { $in: parsedPlatforms },
+            status: "connected"
+        }).select("platform");
+
+        const connectedPlatforms = connectedAccounts.map((account) => account.platform as string);
+
+        const missingPlatforms = parsedPlatforms.filter((platform: string) => !connectedPlatforms.includes(platform));
+
+        if (missingPlatforms.length > 0) {
+            res.status(400).json({
+                message: `Please connect: ${missingPlatforms.join(", ")}`
+            });
+            return;
+        }
+
+        const scheduleKey = crypto.createHash("sha256").update(JSON.stringify({
+                    user: req.user._id.toString(),
+                    content,
+                    platforms: [...parsedPlatforms].sort(),
+                    scheduledFor: new Date(scheduledFor).toISOString(),
+                    mediaUrl: mediaUrl || "",
+                })
+            ).digest("hex");
+
         const post = await Post.create({
             user:req.user._id,
             content,
@@ -180,13 +208,18 @@ export const schedulePost = async(req:AuthRequest,res:Response):Promise<void>=>{
             mediaUrl,
             mediaType,
             scheduledFor,
+            scheduleKey,
             status
         })
         res.status(201).json(post)
     }
     catch (error:any) {
-        console.error("generatePost:", error);
+        console.error("schedulePost:", error);
 
+        if (error?.code === 11000) {
+            res.status(409).json({message: "This post is already scheduled."});
+            return;
+        }
         res.status(500).json({
             message: "Internal Server Error",
         });
