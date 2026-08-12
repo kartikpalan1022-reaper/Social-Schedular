@@ -264,5 +264,6 @@ const Schedular = () => {
     </div>
   )
 }
+}
 
 export default Schedular
