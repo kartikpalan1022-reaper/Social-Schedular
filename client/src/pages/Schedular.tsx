@@ -24,6 +24,7 @@ const Schedular = () => {
       if (showError) {
         toast.error(error?.response?.data?.message || error.message);
       }
+    }
   }
 
   useEffect(() => {
@@ -263,6 +264,7 @@ const Schedular = () => {
       </div>
     </div>
   )
-}
 
+  
+}
 export default Schedular
