@@ -19,6 +19,7 @@ const AIComposer = () => {
   const [scheduledTime,setScheduledTime] = useState("");
   const [scheduledDate,setScheduledDate] = useState("");
   const [scheduling,setScheduling] = useState(false);
+  const [connectedPlatforms, setConnectedPlatforms] = useState<string[]>([]);
 
   const fetchGenerations = async()=>{
     try{
@@ -30,9 +31,21 @@ const AIComposer = () => {
     }
   }
 
-  useEffect(()=>{
+  useEffect(() => {
     fetchGenerations();
-  },[])
+
+    const fetchConnectedAccounts = async () => {
+      try {
+        const { data } = await api.get("/api/accounts");
+
+        const connected = data.filter((account: any) => account.status === "connected").map((account: any) => account.platform);
+        setConnectedPlatforms(connected);
+      } catch (error: any) {
+        console.error("Failed to fetch connected accounts:", error);
+      }
+    };
+    fetchConnectedAccounts();
+  }, []);
 
   const handleGenerate = async()=>{
     if(!prompt){
@@ -65,7 +78,18 @@ const AIComposer = () => {
       return;
     }
     const scheduledFor = new Date(`${scheduledDate}T${scheduledTime}`).toISOString();
+    const notConnected = selectedPlatforms.filter(
+        (platform) => !connectedPlatforms.includes(platform)
+    );
+
+    if (notConnected.length > 0) {
+        const names = notConnected.map((id) => PLATFORMS.find((p) => p.id === id)?.name || id).join(", ");
+        toast.error(`Please connect: ${names}`);
+        return;
+    }
+
     setScheduling(true);
+
     try{
       await api.post("/api/posts",{
         content : activeScheduler.content,
