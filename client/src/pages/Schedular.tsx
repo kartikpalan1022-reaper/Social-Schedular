@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react"
-import { dummyPostsData, PLATFORMS } from "../assets/assets";
+import {  PLATFORMS } from "../assets/assets";
 import { ArrowRightIcon, CalendarDaysIcon, CalendarIcon, ClockIcon, SendIcon, XIcon } from "lucide-react";
+import api from "../api/axios";
+import toast from "react-hot-toast";
 
 const Schedular = () => {
 
@@ -11,29 +13,91 @@ const Schedular = () => {
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
   const [mediaFile,setMediaFile] = useState<File | null>(null);
   const [loading,setLoading] = useState(false);
+  const [connectedPlatforms, setConnectedPlatforms] = useState<string[]>([]);
 
   const fetchPosts = async()=>{
-    setPosts(dummyPostsData);
+    try{
+      const {data} = await api.get("/api/posts");
+      setPosts(data);
+    }
+    catch(error:any){
+      toast.error(error?.response?.data?.message || error.message);
+    }
   }
 
-  useEffect(()=>{
-    (async()=>await fetchPosts())();
-    const interval = setInterval(async()=>await fetchPosts(),1000);
-    return ()=>clearInterval(interval);
-  },[])
+  useEffect(() => {
+    (async () => {
+      await fetchPosts();
+      try {
+        const { data } = await api.get("/api/accounts");
+
+        const connected = data.filter((account: any) => account.status === "connected").map((account: any) => account.platform);
+        setConnectedPlatforms(connected);
+      } 
+      catch (error: any) {
+        console.error("Failed to fetch connected accounts:", error);
+      }
+    })();
+    const interval = setInterval(async () => {
+      await fetchPosts();
+    }, 10000);
+
+    return () => clearInterval(interval);
+  }, []);
 
 
   const scheduled = posts.filter((p)=>p.status === "scheduled");
   const published = posts.filter((p)=>p.status ==="published");
 
   const togglePlatform = (id:string)=> setSelectedPlatforms((prev)=>(prev.includes(id)? prev.filter((p)=>p!==id):[...prev,id]));
+
   const handleSchedule = async(e:React.FormEvent)=>{
     e.preventDefault();
+    if(selectedPlatforms.length === 0){
+      toast.error("Select at least one platform");
+      return;
+    }
+    const notConnected = selectedPlatforms.filter((platform) => !connectedPlatforms.includes(platform));
+
+    if (notConnected.length > 0) {
+      const platformNames = notConnected.map((platform) =>PLATFORMS.find((p) => p.id === platform)?.name || platform).join(", ");
+      toast.error(`${platformNames} ${notConnected.length > 1 ? "accounts are" : "account is"} not connected. Please connect ${notConnected.length > 1 ? "them" : "it"} first.`);
+      return;
+    }
+    if(!scheduledDate || !scheduledTime){
+      toast.error("Select date and time");
+      return;
+    }
+    if(selectedPlatforms.includes('instagram') && !mediaFile){
+      toast.error("Instagram requires an image or video");
+      return;
+    }
+    const scheduledFor = new Date(`${scheduledDate}T${scheduledTime}`).toISOString();
+    const formData = new FormData();
+    formData.append("content",content);
+    formData.append("scheduledFor",scheduledFor);
+    formData.append("status","scheduled");
+    formData.append("platforms", JSON.stringify(selectedPlatforms));
+    if(mediaFile) formData.append("media",mediaFile);
+
     setLoading(true);
-    setTimeout(()=>{
+    try{
+      await api.post("/api/posts",formData,{headers:{"Content-Type":"multipart/form-data"}});
+      toast.success("Post Scheduled!");
+      setContent("");
+      setScheduledDate("");
+      setScheduledTime("");
+      setSelectedPlatforms([]);
+      setMediaFile(null);
+      fetchPosts();
+    }
+    catch(error:any){
+      toast.error(error?.response?.data?.message || error.message);
+    }
+    finally{
       setLoading(false);
-      setPosts((prev)=>[...prev,dummyPostsData[0]])
-    },1000)
+    }
+
   }
 
 

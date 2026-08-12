@@ -7,43 +7,6 @@ import { Generation } from "../model/Generation.js";
 import { Post } from "../model/Post.js";
 
 
-// Helper to poll Leonardo.ai
-const pollLeonardoJob = async (generationId:string,apiKey:string):Promise<string>=>{
-    const maxRetries = 20;
-    const delay = 5000;
-    for(let i=0; i<maxRetries;i++){
-        try{
-            const response = await axios.get(`https://cloud.leonardo.ai/api/rest/v1/generations/${generationId}`,{
-                headers:{
-                    accept:"application/json",
-                    authorization:`Bearer ${apiKey}`
-                }
-            })
-            const generation = response.data.generations_by_pk;
-            if(generation.status === "COMPLETE"){
-                if(generation.generated_images && generation.generated_images.length > 0){
-                    return generation.generated_images[0].url;
-                }
-                throw new Error("Generation complete but no images found");
-            }
-            if(generation.status === "FAILED"){
-                // throw new Error("Generation complete but no images found");
-                throw new Error("Leonardo.ai generation failed");
-            }
-        }
-        catch (err: any) {
-            console.error("Polling Error:", err?.response?.data || err.message);
-
-            if (err.message === "Leonardo.ai generation failed" ||
-                err.message === "Generation complete but no images found") {
-                throw err;
-            }
-        }
-        await new Promise((resolve)=>setTimeout(resolve,delay));
-    }
-    throw new Error("Leonardo.ai generation timed out ")
-}
-
 // Generate Post
 // POST /api/posts/generate
 export const generatePost = async(req:AuthRequest,res:Response):Promise<void>=>{
@@ -59,7 +22,7 @@ export const generatePost = async(req:AuthRequest,res:Response):Promise<void>=>{
 
         // Generate Text
         const textResponse = await ai.models.generateContent({
-            model:"gemini-2.5-flash",
+            model: "gemini-3-flash-preview",
             contents:`Generate a social media post based on this prompt : "${prompt}.
             Tone:${tone}.
             Include Relevant hashtags.
@@ -84,39 +47,39 @@ export const generatePost = async(req:AuthRequest,res:Response):Promise<void>=>{
         let mediaUrl = "";
         if(generateImage){
             try{
-                const leonardoKey = process.env.LEONARDO_API_KEY;
-                if(leonardoKey){
-                    // Use leonardo.ai for image generation
-                    const leoResponse = await axios.post(
-                        "https://cloud.leonardo.ai/api/rest/v2/generations",
-                        {
-                            "public":false,
-                            "model":"gpt-image-2",
-                            "parameters": {
-                                "quality":"LOW",
-                                "prompt":imagePrompt,
-                                "quantity":1,
-                                "width":1024,
-                                "height":1024,
-                                "prompt_enhance":"OFF"
-                            }
-                        },{
-                            headers:{
-                                accept:"application/json",
-                                authorization:`Bearer ${leonardoKey}`,
-                                "content-type":"application/json"
-                            }
-                        }
-                    )
-                    const generationId = leoResponse.data.generate.generationId;
-                    const tempUrl = await pollLeonardoJob(generationId,leonardoKey);
+                const pollinationsKey = process.env.POLLINATIONS_API_KEY;
 
-                    // Upload to cloudinary for persistence
-                    const uploadResult = await cloudinary.uploader.upload(tempUrl,{
-                        folder:"ai-generations"
-                    });
-                    mediaUrl = uploadResult.secure_url
+                if (!pollinationsKey) {
+                    throw new Error("Pollinations API key is missing");
                 }
+
+                const encodedPrompt = encodeURIComponent(imagePrompt);
+
+                const imageUrl =`https://gen.pollinations.ai/image/${encodedPrompt}?model=flux&width=1024&height=1024`;
+
+                const imageResponse = await axios.get(imageUrl, {
+                    headers: {
+                        Authorization: `Bearer ${pollinationsKey}`
+                    },
+                    responseType: "arraybuffer"
+                });
+
+                const uploadResult = await new Promise<any>((resolve, reject) => {
+                    const stream = cloudinary.uploader.upload_stream(
+                        {
+                            folder: "ai-generations",
+                            resource_type: "image"
+                        },
+                        (error, result) => {
+                            if (error) reject(error);
+                            else resolve(result);
+                        }
+                    );
+
+                    stream.end(Buffer.from(imageResponse.data));
+                });
+
+                mediaUrl = uploadResult.secure_url;
             }
             catch(err:any){
                 console.error("Image Generation failed:",err)
