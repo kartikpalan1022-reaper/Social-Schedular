@@ -26,7 +26,7 @@ const Accounts = () => {
       setAccounts(data);
     }
     catch(error:any){
-      toast.error(error?.response?.data?.message || error?.message || "Failed to load accounts");
+      toast.error(error?.response?.data?.message || error?.message || "Failed to load accounts", { id: "sync" });
     }
   }
   useEffect(()=>{
@@ -44,7 +44,7 @@ const Accounts = () => {
         fetchAccounts(true,connectedPlatform,`${label}${handle} connected!`);
       }
       else if(errMsg){
-        toast.error(`Connection failed: ${decodeURIComponent(errMsg)}`);
+        toast.error(`Connection failed: ${errMsg}`);
         fetchAccounts();
       }
       else if(syncNeeded){

@@ -54,6 +54,7 @@ const AIComposer = () => {
     }
   }
   const handleSchedule = async()=>{
+    if(scheduling) return;
     if(!activeScheduler) return;
     if(selectedPlatforms.length === 0){
       toast.error("Select at least one platforms");
@@ -228,7 +229,7 @@ const AIComposer = () => {
                   </div>
                 </div>
               </div>
-              <button onClick={handleSchedule} className="w-full flex items-center justify-center gap-2 py-3 rounded-md bg-slate-200 text-slate-700 hover:bg-red-500 hover:text-white transition">
+              <button onClick={handleSchedule} className="w-full flex items-center justify-center gap-2 py-3 rounded-md bg-slate-200 text-slate-700 hover:bg-red-500 hover:text-white transition disabled:opacity-60">
                 {scheduling ? <Loader2Icon className="size-4 animate-spin"/> : <TimerIcon className="size-4"/> }
                 Schedule Post
               </button>

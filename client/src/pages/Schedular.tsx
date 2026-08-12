@@ -15,19 +15,20 @@ const Schedular = () => {
   const [loading,setLoading] = useState(false);
   const [connectedPlatforms, setConnectedPlatforms] = useState<string[]>([]);
 
-  const fetchPosts = async()=>{
+  const fetchPosts = async(showError = true)=>{
     try{
       const {data} = await api.get("/api/posts");
       setPosts(data);
     }
     catch(error:any){
-      toast.error(error?.response?.data?.message || error.message);
-    }
+      if (showError) {
+        toast.error(error?.response?.data?.message || error.message);
+      }
   }
 
   useEffect(() => {
     (async () => {
-      await fetchPosts();
+      await fetchPosts(true);
       try {
         const { data } = await api.get("/api/accounts");
 
@@ -39,7 +40,7 @@ const Schedular = () => {
       }
     })();
     const interval = setInterval(async () => {
-      await fetchPosts();
+      await fetchPosts(false);
     }, 10000);
 
     return () => clearInterval(interval);

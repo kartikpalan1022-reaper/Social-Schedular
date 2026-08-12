@@ -81,8 +81,12 @@ export const generatePost = async(req:AuthRequest,res:Response):Promise<void>=>{
 
                 mediaUrl = uploadResult.secure_url;
             }
-            catch(err:any){
-                console.error("Image Generation failed:",err)
+            catch (err: any) {
+                console.error("Image Generation failed:", err);
+
+                throw new Error(
+                    err?.message || "Image generation failed"
+                );
             }
         }
 
