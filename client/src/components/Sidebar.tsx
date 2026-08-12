@@ -1,17 +1,11 @@
 import { CalendarDaysIcon, LayoutDashboardIcon, LogOutIcon, UsersIcon, Wand2Icon } from 'lucide-react'
 import { NavLink, useLocation } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext';
 
 const Sidebar = ({isOpen,setIsOpen}:{isOpen:boolean, setIsOpen:(val:boolean)=>void}) => {
 
-    const {logout,user} = {
-        logout:()=>{
-            window.location.href = '/'
-        },
-        user:{
-            name:"John Smith",
-            email:"john@example.com"
-        }
-    }
+    const {logout,user} = useAuth();        
+    
     const location = useLocation();
     const navItems =[
         {name:"Dashboard",icon:LayoutDashboardIcon,path:"/dashboard"},
@@ -21,7 +15,7 @@ const Sidebar = ({isOpen,setIsOpen}:{isOpen:boolean, setIsOpen:(val:boolean)=>vo
     ]
 
   return (
-    <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-200 flex flex-col h-full transform transition-transform duration-200 ease-in-out md:relative md:translate-x-0 ${isOpen ? "translate-x-0" : "translate-x-full"}`}>
+    <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-200 flex flex-col h-full transform transition-transform duration-200 ease-in-out md:relative md:translate-x-0 ${isOpen ? "translate-x-0" : "-translate-x-full"}`}>
 
         {/* Logo */}
         <div className='p-6 pb-4'>

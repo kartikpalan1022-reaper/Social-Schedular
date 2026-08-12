@@ -13,7 +13,7 @@ interface AuthContextType{
     isLoading:boolean;
     login:(userData:User,token:string)=>void;
     logout:()=>void;
-    isAuthenicated:boolean;
+    isAuthenticated:boolean;
 }
 const AuthContext = createContext<AuthContextType|undefined>(undefined);
 
@@ -59,7 +59,7 @@ export const AuthProvider:React.FC<{children:React.ReactNode}> = ({children})=>{
         delete api.defaults.headers.common["Authorization"] 
     }
 
-    return <AuthContext.Provider value={{user,token,isLoading,login,logout,isAuthenicated:!!token}}>
+    return <AuthContext.Provider value={{user,token,isLoading,login,logout,isAuthenticated:!!token}}>
         {children}
     </AuthContext.Provider>
 }
