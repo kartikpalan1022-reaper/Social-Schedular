@@ -4,6 +4,7 @@ A full-stack social media scheduling application that helps users create
 AI-powered social media content, generate images, connect social
 accounts, and schedule posts from a single dashboard.
 
+🌐 **Live Demo:** [Social Scheduler](https://social-scheduler-two-snowy.vercel.app/)
 ## ✨ Features
 
 -   🔐 **Authentication** --- User registration/login with persistent
