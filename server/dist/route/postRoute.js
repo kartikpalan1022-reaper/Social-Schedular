@@ -1,14 +1,11 @@
-import express from "express"
+import express from "express";
 import { protect } from "../middleware/authMiddleware.js";
 import { generatePost, getGenerations, getPosts, processScheduledPostsController, schedulePost } from "../controller/postController.js";
 import { upload } from "../config/multer.js";
-
 const postRouter = express.Router();
-
-postRouter.get("/",protect,getPosts);
-postRouter.get("/generations",protect,getGenerations);
-postRouter.post("/",protect,upload.single("media"),schedulePost);
-postRouter.post("/generate",protect,generatePost);
+postRouter.get("/", protect, getPosts);
+postRouter.get("/generations", protect, getGenerations);
+postRouter.post("/", protect, upload.single("media"), schedulePost);
+postRouter.post("/generate", protect, generatePost);
 postRouter.get("/process-scheduled", processScheduledPostsController);
-
 export default postRouter;

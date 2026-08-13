@@ -1,3 +1,4 @@
+import { processScheduledPosts as processScheduledPostsService } from "../services/schedulerService.js";
 import { Response } from "express";
 import { AuthRequest } from "../middleware/authMiddleware.js";
 import { GoogleGenAI } from "@google/genai"
@@ -225,3 +226,15 @@ export const schedulePost = async(req:AuthRequest,res:Response):Promise<void>=>{
         });
     }
 }
+
+// Process scheduled posts
+// GET /api/posts/process-scheduled
+export const processScheduledPostsController = async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+        await processScheduledPostsService();
+        res.status(200).json({message: "Scheduled posts processed successfully"});
+    } catch (error: any) {
+        console.error("processScheduledPosts:", error);
+        res.status(500).json({message: "Failed to process scheduled posts"});
+    }
+};
