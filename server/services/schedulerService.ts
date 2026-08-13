@@ -7,27 +7,16 @@ import { ActivityLog } from "../model/ActivityLog.js";
 export const processScheduledPosts = async () => {
     try {
         const now = new Date();
+        while (true) {
+            // Atomically claim ONE scheduled post
+            const post = await Post.findOneAndUpdate({status: "scheduled",scheduledFor: { $lte: now }},{$set: {status: "publishing"}},{new: true});
 
-        const postsToPublish = await Post.find({status: "scheduled",scheduledFor: { $lte: now }});
+            // No more scheduled posts
+            if (!post) {
+                break;
+            }
 
-        for (const post of postsToPublish) {
             try {
-                console.log("POST USER:", post.user.toString());
-                console.log("POST PLATFORMS:", post.platforms);
-
-                const allUserAccounts = await Account.find({
-                    user: post.user
-                });
-
-                console.log(
-                    "ALL USER ACCOUNTS:",
-                    allUserAccounts.map(acc => ({
-                        platform: acc.platform,
-                        status: acc.status,
-                        zernioAccountId: acc.zernioAccountId
-                    }))
-                );
-
                 const accounts = await Account.find({
                     user: post.user,
                     platform: { $in: post.platforms },
@@ -39,6 +28,13 @@ export const processScheduledPosts = async () => {
 
                 if (accounts.length === 0) {
                     console.log(`No connected Zernio accounts found for post ${post._id}`);
+                    post.status = "failed";
+
+                    try {
+                        await post.save();
+                    } catch (saveError: any) {
+                        console.error(`Failed to save failed status for post ${post._id}:`,saveError);
+                    }
                     continue;
                 }
 
@@ -50,63 +46,79 @@ export const processScheduledPosts = async () => {
                 const payload = {
                     content: post.content,
                     publishNow: true,
+
                     ...(post.mediaUrl
                         ? {
-                            mediaItems: [{type: post.mediaType || "image", url: post.mediaUrl}]
+                              mediaItems: [{
+                                    type: post.mediaType || "image",
+                                    url: post.mediaUrl
+                                  }
+                              ]
                           }
                         : {}),
+
                     platforms: zernioPlatforms
                 };
 
-                console.log(`Publishing post ${post._id} to zernio with media: ${post.mediaUrl || "none"}`);
+                console.log(`Publishing post ${post._id} to Zernio with media: ${post.mediaUrl || "none"}`);
 
                 const response = await zernio.posts.createPost({body: payload});
 
-                const publishedPost =(response.data as any)?.post || response.data;
+                const publishedPost = (response.data as any)?.post || response.data;
 
                 if (!publishedPost) {
-                    throw new Error(
-                        "Failed to get post object from Zernio response"
-                    );
+                    throw new Error("Failed to get post object from Zernio response");
                 }
 
-                console.log(`Zernio post created: ${publishedPost._id || publishedPost.id}`);
+                console.log(`Zernio post created: ${publishedPost._id || publishedPost.id}`
+                );
 
+                // Mark as published
                 post.status = "published";
                 await post.save();
 
+                // Activity log
                 try {
                     await ActivityLog.create({
                         user: post.user,
                         actionType: "POST_PUBLISHED",
-                        description: `Published post to ${accounts
-                            .map((a) => a.platform)
-                            .join(", ")}`,
+                        description: `Published post to ${accounts.map((a) => a.platform).join(", ")}`,
                         relatedPosts: post._id
                     });
                 } catch (logError) {
                     console.error("Activity log failed:", logError);
                 }
             } catch (err: any) {
-                console.error(`Failed to publish post ${post._id}:`, err?.response?.data || err?.message);
+                console.error(`Failed to publish post ${post._id}:`,err.response?.data || err.message);
+
+                // Mark post as failed
                 post.status = "failed";
-                await post.save();
+
+                try {
+                    await post.save();
+                } catch (saveError: any) {
+                    console.error(`Failed to save failed status for post ${post._id}:`,saveError);
+                }
             }
         }
 
-        if (postsToPublish.length > 0) {
-            console.log(`Evaluated ${postsToPublish.length} posts at ${now.toISOString()}`);
-        }
+        console.log(`Scheduler finished checking posts at ${now.toISOString()}`);
     } catch (error: any) {
         console.error("Error in scheduler:", error);
+
+        // Important: don't hide scheduler-level errors
+        throw error;
     }
 };
+
+// Vercel cron will call the API endpoint.
+// Local node-cron is intentionally disabled.
+
 // export const initScheduler = () => {
 //     cron.schedule("* * * * *", async () => {
 //         console.log("⏰ Scheduler checking scheduled posts...");
-
 //         await processScheduledPosts();
 //     });
-
+//
 //     console.log("✅ Scheduler service initialized");
 // };

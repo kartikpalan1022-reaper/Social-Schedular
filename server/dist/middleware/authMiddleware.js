@@ -25,3 +25,13 @@ export const protect = async (req, res, next) => {
         res.status(401).json({ message: "Not authorized, no token" });
     }
 };
+export const cronAuth = (req, res, next) => {
+    const authHeader = req.headers.authorization;
+    if (!process.env.CRON_SECRET) {
+        return res.status(500).json({ message: "CRON_SECRET is not configured" });
+    }
+    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+        return res.status(401).json({ message: "Unauthorized" });
+    }
+    next();
+};

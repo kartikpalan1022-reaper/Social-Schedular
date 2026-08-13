@@ -16,11 +16,5 @@
       "src": "/(.*)",
       "dest": "server.ts"
     }
-  ],
-  "crons": [
-    {
-      "path": "/api/posts/process-scheduled",
-      "schedule": "* * * * *"
-    }
   ]
 }
