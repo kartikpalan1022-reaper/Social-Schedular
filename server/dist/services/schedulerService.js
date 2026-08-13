@@ -14,14 +14,6 @@ export const processScheduledPosts = async () => {
                 break;
             }
             try {
-                console.log("POST USER:", post.user.toString());
-                console.log("POST PLATFORMS:", post.platforms);
-                const allUserAccounts = await Account.find({ user: post.user });
-                console.log("ALL USER ACCOUNTS:", allUserAccounts.map((acc) => ({
-                    platform: acc.platform,
-                    status: acc.status,
-                    zernioAccountId: acc.zernioAccountId
-                })));
                 const accounts = await Account.find({
                     user: post.user,
                     platform: { $in: post.platforms },
