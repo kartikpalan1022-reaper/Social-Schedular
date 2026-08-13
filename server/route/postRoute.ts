@@ -9,6 +9,6 @@ postRouter.get("/",protect,getPosts);
 postRouter.get("/generations",protect,getGenerations);
 postRouter.post("/",protect,upload.single("media"),schedulePost);
 postRouter.post("/generate",protect,generatePost);
-postRouter.get("/process-scheduled",cronAuth, processScheduledPostsController);
+postRouter.post("/process-scheduled",cronAuth, processScheduledPostsController);
 
 export default postRouter;
